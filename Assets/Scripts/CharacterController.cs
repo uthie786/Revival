@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class CharacterController : MonoBehaviour
 {
-    
     public float moveSpeed = 5f;
     public float jumpForce = 5f;
     private Rigidbody rb;
     private bool isGrounded;
+    public Camera mainCamera; // Reference to the main camera
 
     void Start()
     {
@@ -27,7 +27,15 @@ public class CharacterController : MonoBehaviour
         float moveX = Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
         float moveZ = Input.GetAxis("Vertical") * moveSpeed * Time.deltaTime;
 
-        Vector3 move = new Vector3(moveX, 0, moveZ);
+        Vector3 forward = mainCamera.transform.forward;
+        forward.y = 0; // Keep the movement horizontal
+        forward.Normalize();
+
+        Vector3 right = mainCamera.transform.right;
+        right.y = 0; // Keep the movement horizontal
+        right.Normalize();
+
+        Vector3 move = forward * moveZ + right * moveX;
 
         if (move != Vector3.zero)
         {
@@ -62,4 +70,3 @@ public class CharacterController : MonoBehaviour
         }
     }
 }
-

@@ -15,17 +15,16 @@ public class CharacterController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         Move();
         Jump();
-        Debug.Log(isGrounded);
     }
 
     void Move()
     {
-        float moveX = Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime;
-        float moveZ = Input.GetAxis("Vertical") * moveSpeed * Time.deltaTime;
+        float moveX = Input.GetAxis("Horizontal") * moveSpeed * Time.fixedDeltaTime;
+        float moveZ = Input.GetAxis("Vertical") * moveSpeed * Time.fixedDeltaTime;
 
         Vector3 forward = mainCamera.transform.forward;
         forward.y = 0; // Keep the movement horizontal
@@ -40,10 +39,10 @@ public class CharacterController : MonoBehaviour
         if (move != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(move);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * moveSpeed);
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, Time.fixedDeltaTime * moveSpeed));
         }
 
-        rb.MovePosition(transform.position + move);
+        rb.MovePosition(rb.position + move);
     }
 
     void Jump()
@@ -69,4 +68,5 @@ public class CharacterController : MonoBehaviour
             isGrounded = false;
         }
     }
+
 }

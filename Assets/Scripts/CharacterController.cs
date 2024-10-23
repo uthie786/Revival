@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,18 +8,37 @@ public class CharacterController : MonoBehaviour
     public float moveSpeed = 5f;
     public float jumpForce = 5f;
     private Rigidbody rb;
-    private bool isGrounded;
+    public bool isGrounded;
     public Camera mainCamera; // Reference to the main camera
+    public Material tyreMaterial; // Reference to the tyre material
+    public float textureScrollSpeed = 0.1f; // Speed at which the texture scrolls
+
+    public TrailRenderer leftTireTrail; // Reference to the left tire trail
+    public TrailRenderer rightTireTrail; // Reference to the right tire trail
+    public float trailWidth = 0.2f; // Width of the tire trails
+    public Color trailColor = Color.black; // Color of the tire trails
+
+    private float textureOffsetY = 0f;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+
+        // Initialize the trail renderers
+        InitializeTrailRenderer(leftTireTrail);
+        InitializeTrailRenderer(rightTireTrail);
+    }
+
+    private void Update()
+    {
+        Jump();
+        UpdateTrails();
     }
 
     void FixedUpdate()
     {
         Move();
-        Jump();
+        UpdateTyreTexture();
     }
 
     void Move()
@@ -53,6 +73,21 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    void UpdateTyreTexture()
+    {
+        if (rb.velocity.magnitude > 0.1f)
+        {
+            textureOffsetY += textureScrollSpeed * Time.fixedDeltaTime;
+            tyreMaterial.mainTextureOffset = new Vector2(0, textureOffsetY);
+        }
+    }
+
+    void UpdateTrails()
+    {
+        leftTireTrail.emitting = isGrounded;
+        rightTireTrail.emitting = isGrounded;
+    }
+
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
@@ -69,4 +104,14 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    void InitializeTrailRenderer(TrailRenderer trail)
+    {
+        if (trail != null)
+        {
+            trail.startWidth = trailWidth;
+            trail.endWidth = trailWidth;
+            trail.material.color = trailColor;
+            trail.alignment = LineAlignment.View; // Ensure the trail stays parallel to the ground
+        }
+    }
 }

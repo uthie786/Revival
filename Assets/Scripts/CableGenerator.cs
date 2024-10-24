@@ -15,8 +15,10 @@ public class CableGenerator : MonoBehaviour
         GenerateRope();
     }
 
-    void GenerateRope()
+    public void GenerateRope()
     {
+        ClearRope(); // Clear existing rope before generating a new one
+
         GameObject previousSegment = null;
 
         for (int i = 0; i < segmentCount; i++)
@@ -28,18 +30,15 @@ public class CableGenerator : MonoBehaviour
 
             if (i == 0)
             {
-                // Use a ConfigurableJoint for the first segment
-                ConfigurableJoint joint = newSegment.AddComponent<ConfigurableJoint>();
+                // Use a FixedJoint for the first segment
+                FixedJoint joint = newSegment.AddComponent<FixedJoint>();
                 joint.connectedBody = movingObject;
-                joint.xMotion = ConfigurableJointMotion.Locked;
-                joint.yMotion = ConfigurableJointMotion.Locked;
-                joint.zMotion = ConfigurableJointMotion.Locked;
-                joint.angularXMotion = ConfigurableJointMotion.Free;
-                joint.angularYMotion = ConfigurableJointMotion.Free;
-                joint.angularZMotion = ConfigurableJointMotion.Free;
             }
             else
             {
+                // Make the rest of the segments non-kinematic
+                rb.isKinematic = false;
+
                 HingeJoint joint = newSegment.AddComponent<HingeJoint>();
                 joint.connectedBody = previousSegment.GetComponent<Rigidbody>();
                 joint.anchor = new Vector3(0, segmentLength / 2, 0);
@@ -54,6 +53,14 @@ public class CableGenerator : MonoBehaviour
             }
 
             previousSegment = newSegment;
+        }
+    }
+
+    public void ClearRope()
+    {
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
         }
     }
 }

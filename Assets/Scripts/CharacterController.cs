@@ -14,13 +14,15 @@ public class CharacterController : MonoBehaviour
     public Camera mainCamera; // Reference to the main camera
     public Material tyreMaterial; // Reference to the tyre material
     public float textureScrollSpeed = 0.1f; // Speed at which the texture scrolls
-
     public TrailRenderer leftTireTrail; // Reference to the left tire trail
     public TrailRenderer rightTireTrail; // Reference to the right tire trail
     public float trailWidth = 0.2f; // Width of the tire trails
     public Color trailColor = Color.black; // Color of the tire trails
-
+    public AudioSource jumpSound;
+    public AudioSource impactSound;
     private float textureOffsetY = 0f;
+    public GameObject lvl2SpawnPoint;
+    public CableGenerator cableGenerator;
 
     void Start()
     {
@@ -71,7 +73,9 @@ public class CharacterController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
+            jumpSound.Play();
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            
         }
     }
 
@@ -94,6 +98,7 @@ public class CharacterController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ground"))
         {
+            impactSound.Play();
             isGrounded = true;
         }
        
@@ -112,6 +117,14 @@ public class CharacterController : MonoBehaviour
         if(other.gameObject.CompareTag("Lethal"))
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+
+        if (other.gameObject.CompareTag("NewLevel"))
+        {
+            gameObject.transform.position = lvl2SpawnPoint.transform.position;
+            gameObject.transform.rotation = lvl2SpawnPoint.transform.rotation;
+            cableGenerator.ClearRope();
+            cableGenerator.GenerateRope();
         }
     }
 

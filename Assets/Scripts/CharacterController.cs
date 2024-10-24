@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CharacterController : MonoBehaviour
 {
@@ -33,12 +35,12 @@ public class CharacterController : MonoBehaviour
     {
         Jump();
         UpdateTrails();
+        UpdateTyreTexture();
     }
 
     void FixedUpdate()
     {
         Move();
-        UpdateTyreTexture();
     }
 
     void Move()
@@ -75,7 +77,7 @@ public class CharacterController : MonoBehaviour
 
     void UpdateTyreTexture()
     {
-        if (rb.velocity.magnitude > 0.1f)
+        if(Input.GetAxis("Horizontal" ) != 0 || Input.GetAxis("Vertical") != 0)
         {
             textureOffsetY += textureScrollSpeed * Time.fixedDeltaTime;
             tyreMaterial.mainTextureOffset = new Vector2(0, textureOffsetY);
@@ -94,6 +96,7 @@ public class CharacterController : MonoBehaviour
         {
             isGrounded = true;
         }
+       
     }
 
     void OnCollisionExit(Collision collision)
@@ -101,6 +104,14 @@ public class CharacterController : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = false;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.CompareTag("Lethal"))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 

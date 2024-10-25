@@ -14,6 +14,7 @@ public class ButtonManager : MonoBehaviour
 
     public void QuitToMenu()
     {
+        Debug.Log("clicked");
         SceneManager.LoadScene("MainMenu"); // Load the main menu scene
     }
 }

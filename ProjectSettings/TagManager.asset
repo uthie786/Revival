@@ -7,6 +7,9 @@ TagManager:
   - Ground
   - Lethal
   - NewLevel
+  - StartButton
+  - InfoButton
+  - Windmill
   layers:
   - Default
   - TransparentFX

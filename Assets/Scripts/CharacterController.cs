@@ -23,9 +23,23 @@ public class CharacterController : MonoBehaviour
     private float textureOffsetY = 0f;
     public GameObject lvl2SpawnPoint;
     public CableGenerator cableGenerator;
+    public Camera winCamera;
+    public GameObject windTurbine;
+    public GameObject winScreen;
+    public AudioSource btnSFX;
 
     void Start()
     {
+        if (winCamera != null)
+        {
+            winCamera.enabled = false;
+        }
+
+        if (mainCamera != mainCamera)
+        {
+            mainCamera.enabled = true;
+        }
+        
         rb = GetComponent<Rigidbody>();
 
         // Initialize the trail renderers
@@ -126,6 +140,28 @@ public class CharacterController : MonoBehaviour
             cableGenerator.ClearRope();
             cableGenerator.GenerateRope();
         }
+
+        if (other.gameObject.CompareTag("Windmill"))
+        {
+            btnSFX.Play();
+            // Connect the last segment of the cable to an empty GameObject
+            GameObject emptyObject = GameObject.Find("Connector");
+            emptyObject.transform.position = cableGenerator.transform.position + Vector3.back * cableGenerator.segmentLength * (cableGenerator.segmentCount - 1);
+            Rigidbody emptyRb = emptyObject.AddComponent<Rigidbody>();
+            Debug.Log(emptyRb , emptyObject);
+            emptyRb.isKinematic = true;
+
+            HingeJoint lastSegmentJoint = cableGenerator.transform.GetChild(cableGenerator.segmentCount - 1).gameObject.AddComponent<HingeJoint>();
+            lastSegmentJoint.connectedBody = emptyRb;
+            lastSegmentJoint.anchor = new Vector3(0, cableGenerator.segmentLength / 2, 0);
+            lastSegmentJoint.axis = Vector3.forward;
+
+            // Disable player control
+            this.enabled = false;
+
+            // Start coroutine to show win screen
+            StartCoroutine(Victory());
+        }
     }
 
     void InitializeTrailRenderer(TrailRenderer trail)
@@ -137,5 +173,35 @@ public class CharacterController : MonoBehaviour
             trail.material.color = trailColor;
             trail.alignment = LineAlignment.View; // Ensure the trail stays parallel to the ground
         }
+    }
+
+    IEnumerator Victory()
+    {
+       
+        // Switch to a new camera
+        mainCamera.gameObject.SetActive(false);
+        winCamera.gameObject.SetActive(true);
+        winCamera.GetComponent<Camera>().enabled = true;
+
+        // Wait for 1 second
+        yield return new WaitForSeconds(1f);
+
+        // Start spinning the windmill turbine
+        float maxSpeed = 90f; // degrees per second
+        float currentSpeed = 0f;
+        float acceleration = maxSpeed / 2f; // speed increase per second
+
+        float elapsedTime = 0f;
+        while (elapsedTime < 5f)
+        {
+            elapsedTime += Time.deltaTime;
+            currentSpeed = Mathf.Lerp(0, maxSpeed, elapsedTime / 3f);
+            windTurbine.transform.Rotate(Vector3.forward * currentSpeed * Time.deltaTime);
+            yield return null;
+        }
+
+        btnSFX.Play();
+        // Make the Winscreen gameobject active
+        winScreen.SetActive(true); 
     }
 }
